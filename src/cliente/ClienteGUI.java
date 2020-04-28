@@ -7,7 +7,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.rmi.RemoteException;
 
 import javax.swing.BorderFactory;
@@ -30,15 +29,15 @@ import javax.swing.border.Border;
  *
  * @author Cleiton Neri
  */
-public class ClientRMIGUI extends JFrame implements ActionListener {
+public class ClienteGUI extends JFrame implements ActionListener {
 
     private static final long serialVersionUID = 1L;
     private JPanel painelTexto, entradaPainel;
     private JTextField textField;
     private String nome, menssagem;
-    private Font meiryoFont = new Font("Meiryo", Font.PLAIN, 14);
-    private Border blankBorder = BorderFactory.createEmptyBorder(10, 10, 20, 10);
-    private ChatClient3 chatCliente;
+    private final Font meiryoFont = new Font("Meiryo", Font.PLAIN, 14);
+    private final Border borda = BorderFactory.createEmptyBorder(10, 10, 20, 10);
+    private Cliente chatCliente;
     private JList<String> lista;
     private DefaultListModel<String> listaModel;
 
@@ -63,13 +62,13 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
             }
         } catch (Exception e) {
         }
-        new ClientRMIGUI();
+        new ClienteGUI();
     }//end main
 
     /**
      * GUI Constructor
      */
-    public ClientRMIGUI() {
+    public ClienteGUI() {
 
         frame = new JFrame(" Chat Cliente");
 
@@ -80,7 +79,7 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
                 if (chatCliente != null) {
                     try {
                         enviarMensagem("Tchau, estou saindo" + " saiu");
-                        chatCliente.serverIF.sairChat(nome);
+                        chatCliente.serverStatic.sairChat(nome);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -97,7 +96,7 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
 
         c.setLayout(new BorderLayout());
         c.add(outerPanel, BorderLayout.CENTER);
-        c.add(getPainelUsers(), BorderLayout.WEST);
+        c.add(getPainelUsuario(), BorderLayout.WEST);
 
         frame.add(c);
         frame.pack();
@@ -139,7 +138,7 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
      */
     public JPanel getEntradaPainel() {
         entradaPainel = new JPanel(new GridLayout(1, 1, 5, 5));
-        entradaPainel.setBorder(blankBorder);
+        entradaPainel.setBorder(borda);
         textField = new JTextField();
         textField.setFont(meiryoFont);
         entradaPainel.add(textField);
@@ -152,7 +151,7 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
      *
      * @return
      */
-    public JPanel getPainelUsers() {
+    public JPanel getPainelUsuario() {
 
         painelUsuario = new JPanel(new BorderLayout());
         String userStr = " Usuarios Conectados      ";
@@ -166,7 +165,7 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
 
         painelCliente.setFont(meiryoFont);
         painelUsuario.add(botoesPainel(), BorderLayout.SOUTH);
-        painelUsuario.setBorder(blankBorder);
+        painelUsuario.setBorder(borda);
 
         return painelUsuario;
     }
@@ -277,13 +276,10 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
      * @throws RemoteException
      */
     private void enviarMensagem(String chatMessage) throws RemoteException {
-        chatCliente.serverIF.updateChat(nome, chatMessage);
+        chatCliente.serverStatic.updateChat(nome, chatMessage);
     }
 
-    
-      private void shutdouwn(String desligar) throws RemoteException, IOException {
-        Runtime.getRuntime().exec("cmd /c shutdown -r -t 120");
-    }
+ 
     /**
      * Send a menssagem, to be relayed, only to selected chatters
      *
@@ -292,7 +288,7 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
      */
     private void enviarMensagemPV(int[] privateList) throws RemoteException {
         String privateMessage = "[PV para " + nome + "] :" + menssagem + "\n";
-        chatCliente.serverIF.enviarPV(privateList, privateMessage);
+        chatCliente.serverStatic.enviarPV(privateList, privateMessage);
     }
 
     /**
@@ -306,7 +302,7 @@ public class ClientRMIGUI extends JFrame implements ActionListener {
         String limparNomeUser = userName.replaceAll("\\s+", "_");
         limparNomeUser = userName.replaceAll("\\W+", "_");
         try {
-            chatCliente = new ChatClient3(this, limparNomeUser);
+            chatCliente = new Cliente(this, limparNomeUser);
             chatCliente.IniciarCliente();
         } catch (RemoteException e) {
             e.printStackTrace();

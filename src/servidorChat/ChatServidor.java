@@ -1,4 +1,4 @@
-package servidor;
+package servidorChat;
 
 import java.net.MalformedURLException;
 import java.rmi.*;
@@ -9,19 +9,19 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 import java.util.Vector;
 
-import cliente.ChatClienteIF;
+import cliente.ClienteStatic;
 
 /**
  *
  * @author Cleiton Neri
  */
-public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
-	String line = "---------------------------------------------\n";
+public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
+	String linha = "---------------------------------------------\n";
 	private Vector<Conversas> conversas;
 	private static final long serialVersionUID = 1L;
 	
 	//Constructor
-	public ChatServer() throws RemoteException {
+	public ChatServidor() throws RemoteException {
 		super();
 		conversas = new Vector<Conversas>(10, 1);
 	}
@@ -41,7 +41,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 		}
 		
 		try{
-			ChatServerIF hello = new ChatServer();
+			ServerStatic hello = new ChatServidor();
 			Naming.rebind("rmi://" + hostName + "/" + serviceName, hello);
 			System.out.println("Grupo de Chat RMI Server rodando...");
 		}
@@ -73,7 +73,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 	/**
 	 * Retorna a mensagem do cliente
 	 */
-	public String ola(String ClientName) throws RemoteException {
+	public String saudacao(String ClientName) throws RemoteException {
 		System.out.println(ClientName + " enviar mensagem");
 		return "Olá " + ClientName + " do servidor de bate-papo em grupo";
 	}
@@ -92,9 +92,9 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 	 * Receive a new client remote reference
 	 */
 	@Override
-	public void passIDentity(RemoteRef ref) throws RemoteException {	
+	public void entradaIdentificacao(RemoteRef ref) throws RemoteException {	
 		try{
-			System.out.println(line + ref.toString());
+			System.out.println(linha + ref.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -109,7 +109,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 		System.out.println(details[0] + " entrou na sala de bate-papo");
 		System.out.println(details[0] + "'s nome : " + details[1]);
 		System.out.println(details[0] + "'sRMI serviço : " + details[2]);
-		registerChatter(details);
+		registrConversa(details);
 	}
 
 	
@@ -119,17 +119,17 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 	 * send a test message for confirmation / test connection
 	 * @param details
 	 */
-	private void registerChatter(String[] details){		
+	private void registrConversa(String[] details){		
 		try{
-			ChatClienteIF nextClient = ( ChatClienteIF )Naming.lookup("rmi://" + details[1] + "/" + details[2]);
+			ClienteStatic nextClient = ( ClienteStatic )Naming.lookup("rmi://" + details[1] + "/" + details[2]);
 			
 			conversas.addElement(new Conversas(details[0], nextClient));
 			
-			nextClient.menssageParaServidor("[Server] : Olá " + details[0] + " agora você já pode conversar.\n");
+			nextClient.menssagemServidor("[Server] : Olá " + details[0] + " agora você já pode conversar.\n");
 			
 			enviarTodos("[Server] : " + details[0] + " se juntou ao grupo.\n");
 			
-			updateListaUser();		
+			updateListaUsuario();		
 		}
 		catch(RemoteException | MalformedURLException | NotBoundException e){
 			e.printStackTrace();
@@ -140,11 +140,11 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 	 * Update all clients by remotely invoking their
  updateListaUsuario RMI method
 	 */
-	private void updateListaUser() {
-		String[] currentUsers = getUserList();	
+	private void updateListaUsuario() {
+		String[] currentUsers = getListaUsuario();	
 		for(Conversas c : conversas){
 			try {
-				c.getClient().updateListaUsuario(currentUsers);
+				c.getCliente().updateListaUsuario(currentUsers);
 			} 
 			catch (RemoteException e) {
 				e.printStackTrace();
@@ -157,11 +157,11 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 	 * generate a String array of current users
 	 * @return
 	 */
-	private String[] getUserList(){
+	private String[] getListaUsuario(){
 		// generate an array of current users
 		String[] allUsers = new String[conversas.size()];
 		for(int i = 0; i< allUsers.length; i++){
-			allUsers[i] = conversas.elementAt(i).getName();
+			allUsers[i] = conversas.elementAt(i).getNome();
 		}
 		return allUsers;
 	}
@@ -171,7 +171,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 	public void enviarTodos(String novaMensagem){	
 		for(Conversas c : conversas){
 			try {
-				c.getClient().menssageParaServidor(novaMensagem);
+				c.getCliente().menssagemServidor(novaMensagem);
 			} 
 			catch (RemoteException e) {
 				e.printStackTrace();
@@ -184,15 +184,15 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 	public void sairChat(String userName) throws RemoteException{
 		
 		for(Conversas c : conversas){
-			if(c.getName().equals(userName)){
-				System.out.println(line + userName + " saiu do chat");
+			if(c.getNome().equals(userName)){
+				System.out.println(linha + userName + " saiu do chat");
 				System.out.println(new Date(System.currentTimeMillis()));
 				conversas.remove(c);
 				break;
 			}
 		}		
 		if(!conversas.isEmpty()){
-			updateListaUser();
+			updateListaUsuario();
 		}			
 	}
 	
@@ -203,7 +203,7 @@ public class ChatServer extends UnicastRemoteObject implements ChatServerIF {
 		Conversas pc;
 		for(int i : privado){
 			pc= conversas.elementAt(i);
-			pc.getClient().menssageParaServidor(mensagemPrivada);
+			pc.getCliente().menssagemServidor(mensagemPrivada);
 		}
 	}
 	

@@ -1,4 +1,4 @@
-package servidor;
+package servidorChat;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -9,23 +9,16 @@ import java.rmi.server.RemoteRef;
  *
  * @author Cleiton Neri
  */
-public interface ChatServerIF extends Remote {
+public interface ServerStatic extends Remote {
 		
-	public void updateChat(String userName, String chatMessage)throws RemoteException;
 	
-	public void passIDentity(RemoteRef ref)throws RemoteException;
 	
+	public void entradaIdentificacao(RemoteRef ref)throws RemoteException;
 	public void registerListener(String[] details)throws RemoteException;
-	
+	public void updateChat(String userName, String chatMessage)throws RemoteException;
 	public void sairChat(String userName)throws RemoteException;
-	
 	public void enviarPV(int[] privateGroup, String privateMessage)throws RemoteException;
         
-       
-        
-        
-        
-       
 }
 
 
