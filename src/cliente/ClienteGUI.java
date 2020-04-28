@@ -46,13 +46,9 @@ public class ClienteGUI extends JFrame implements ActionListener {
     protected JButton botaoMensagemPV, botaoIniciar, botaoEnviar;
     protected JPanel painelCliente, painelUsuario;
 
-    /**
-     * Main method to start client GUI app.
-     *
-     * @param args
-     */
+   
     public static void main(String args[]) {
-        //set the look and feel to 'Nimbus'
+
         try {
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -63,11 +59,9 @@ public class ClienteGUI extends JFrame implements ActionListener {
         } catch (Exception e) {
         }
         new ClienteGUI();
-    }//end main
-
-    /**
-     * GUI Constructor
-     */
+    }
+    
+    
     public ClienteGUI() {
 
         frame = new JFrame(" Chat Cliente");
@@ -108,11 +102,7 @@ public class ClienteGUI extends JFrame implements ActionListener {
         frame.setVisible(true);
     }
 
-    /**
-     * Method to set up the JPanel to display the chat text
-     *
-     * @return
-     */
+    
     public JPanel getPainelTexto() {
         String bem_vindo = "Bem-vindo, digite seu nome e pressione Iniciar para começar\n";
         campoTexto = new JTextArea(bem_vindo, 14, 35);
@@ -131,11 +121,7 @@ public class ClienteGUI extends JFrame implements ActionListener {
         return painelTexto;
     }
 
-    /**
-     * Method to build the panel with input field
-     *
-     * @return entradaPainel
-     */
+    
     public JPanel getEntradaPainel() {
         entradaPainel = new JPanel(new GridLayout(1, 1, 5, 5));
         entradaPainel.setBorder(borda);
@@ -145,12 +131,7 @@ public class ClienteGUI extends JFrame implements ActionListener {
         return entradaPainel;
     }
 
-    /**
-     * Method to build the panel displaying currently connected users with a
-     * call to the button panel building method
-     *
-     * @return
-     */
+   
     public JPanel getPainelUsuario() {
 
         painelUsuario = new JPanel(new BorderLayout());
@@ -170,12 +151,7 @@ public class ClienteGUI extends JFrame implements ActionListener {
         return painelUsuario;
     }
 
-    /**
-     * Populate current user panel with a selectable lista of currently
-     * connected users
-     *
-     * @param clientesConectados
-     */
+   
     public void setPainelCliente(String[] clientesConectados) {
         painelCliente = new JPanel(new BorderLayout());
         listaModel = new DefaultListModel<>();
@@ -187,7 +163,6 @@ public class ClienteGUI extends JFrame implements ActionListener {
             botaoMensagemPV.setEnabled(true);
         }
 
-        //Create the lista and put it in a scroll pane.
         lista = new JList<>(listaModel);
         lista.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         lista.setVisibleRowCount(8);
@@ -225,7 +200,6 @@ public class ClienteGUI extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         try {
-            //get connected to chat service
             if (e.getSource() == botaoIniciar) {
                 nome = textField.getText();
                 if (nome.length() != 0) {
@@ -242,7 +216,6 @@ public class ClienteGUI extends JFrame implements ActionListener {
                 }
             }
 
-            //get text and clear textField
             if (e.getSource() == botaoEnviar) {
                 menssagem = textField.getText();
                 textField.setText("");
@@ -250,7 +223,6 @@ public class ClienteGUI extends JFrame implements ActionListener {
                 System.out.println("Sending message : " + menssagem);
             }
 
-            //send a private menssagem, to selected users
             if (e.getSource() == botaoMensagemPV) {
                 int[] privateList = lista.getSelectedIndices();
 
@@ -266,39 +238,20 @@ public class ClienteGUI extends JFrame implements ActionListener {
             remoteExc.printStackTrace();
         }
 
-    }//end actionPerformed
-
-    // --------------------------------------------------------------------
-    /**
-     * Send a menssagem, to be relayed to all chatters
-     *
-     * @param chatMessage
-     * @throws RemoteException
-     */
+    }
+    
     private void enviarMensagem(String chatMessage) throws RemoteException {
         chatCliente.serverStatic.updateChat(nome, chatMessage);
     }
 
  
-    /**
-     * Send a menssagem, to be relayed, only to selected chatters
-     *
-     * @param chatMessage
-     * @throws RemoteException
-     */
     private void enviarMensagemPV(int[] privateList) throws RemoteException {
         String privateMessage = "[PV para " + nome + "] :" + menssagem + "\n";
         chatCliente.serverStatic.enviarPV(privateList, privateMessage);
     }
 
-    /**
-     * Make the connection to the chat server
-     *
-     * @param userName
-     * @throws RemoteException
-     */
+   
     private void getConectado(String userName) throws RemoteException {
-        //remove whitespace and non word characters to avoid malformed url
         String limparNomeUser = userName.replaceAll("\\s+", "_");
         limparNomeUser = userName.replaceAll("\\W+", "_");
         try {

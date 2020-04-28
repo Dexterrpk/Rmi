@@ -20,16 +20,11 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 	private Vector<Conversas> conversas;
 	private static final long serialVersionUID = 1L;
 	
-	//Constructor
 	public ChatServidor() throws RemoteException {
 		super();
 		conversas = new Vector<Conversas>(10, 1);
 	}
 	
-	//-----------------------------------------------------------
-	/**
-	 * METODOS LOCAL 
-	 */	
 	public static void main(String[] args) {
 		iniciarRegistroRMI();	
 		String hostName = "localhost";
@@ -51,9 +46,6 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 	}
 
 	
-	/**
-	 * Iniciaregistro no RMI 
-         */
 	public static void iniciarRegistroRMI() {
 		try{
 			java.rmi.registry.LocateRegistry.createRegistry(1099);
@@ -64,33 +56,17 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 		}
 	}
 		
-	
-	//-----------------------------------------------------------
-	/*
-	 *  METODOS REMOTE 
-	 */
-	
-	/**
-	 * Retorna a mensagem do cliente
-	 */
 	public String saudacao(String ClientName) throws RemoteException {
 		System.out.println(ClientName + " enviar mensagem");
 		return "Olá " + ClientName + " do servidor de bate-papo em grupo";
 	}
 	
         
-	/**
-	 * Send a string ( the latest post, mostly ) 
-	 * to all connected clients
-	 */
 	public void updateChat(String name, String nextPost) throws RemoteException {
 		String message =  name + " : " + nextPost + "\n";
 		enviarTodos(message);
 	}
 	
-	/**
-	 * Receive a new client remote reference
-	 */
 	@Override
 	public void entradaIdentificacao(RemoteRef ref) throws RemoteException {	
 		try{
@@ -112,13 +88,6 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 		registrConversa(details);
 	}
 
-	
-	/**
-	 * register the clients interface and store it in a reference for 
-	 * future messages to be sent to, ie other members messages of the chat session.
-	 * send a test message for confirmation / test connection
-	 * @param details
-	 */
 	private void registrConversa(String[] details){		
 		try{
 			ClienteStatic nextClient = ( ClienteStatic )Naming.lookup("rmi://" + details[1] + "/" + details[2]);
@@ -136,10 +105,6 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 		}
 	}
 	
-	/**
-	 * Update all clients by remotely invoking their
- updateListaUsuario RMI method
-	 */
 	private void updateListaUsuario() {
 		String[] currentUsers = getListaUsuario();	
 		for(Conversas c : conversas){
@@ -152,13 +117,7 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 		}	
 	}
 	
-
-	/**
-	 * generate a String array of current users
-	 * @return
-	 */
 	private String[] getListaUsuario(){
-		// generate an array of current users
 		String[] allUsers = new String[conversas.size()];
 		for(int i = 0; i< allUsers.length; i++){
 			allUsers[i] = conversas.elementAt(i).getNome();

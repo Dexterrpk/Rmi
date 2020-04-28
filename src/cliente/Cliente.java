@@ -90,7 +90,7 @@ public class Cliente  extends UnicastRemoteObject implements ClienteStatic {
 		chatGUI.painelCliente.revalidate();
 	}
 
-}//end class
+}
 
 
 
