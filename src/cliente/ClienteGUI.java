@@ -1,6 +1,7 @@
 package cliente;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -23,6 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 
 /**
@@ -46,7 +48,6 @@ public class ClienteGUI extends JFrame implements ActionListener {
     protected JButton botaoMensagemPV, botaoIniciar, botaoEnviar;
     protected JPanel painelCliente, painelUsuario;
 
-   
     public static void main(String args[]) {
 
         try {
@@ -56,12 +57,14 @@ public class ClienteGUI extends JFrame implements ActionListener {
                     break;
                 }
             }
-        } catch (Exception e) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
         }
-        new ClienteGUI();
+        ClienteGUI clienteGUI = new ClienteGUI();
     }
-    
-    
+
+    /**
+     *
+     */
     public ClienteGUI() {
 
         frame = new JFrame(" Chat Cliente");
@@ -72,10 +75,9 @@ public class ClienteGUI extends JFrame implements ActionListener {
 
                 if (chatCliente != null) {
                     try {
-                        enviarMensagem("Tchau, estou saindo" + " saiu");
+                        enviarMensagem("Tchau, estou saindo\n" + nome+ ": saiu");
                         chatCliente.serverStatic.sairChat(nome);
                     } catch (RemoteException e) {
-                        e.printStackTrace();
                     }
                 }
                 System.exit(0);
@@ -90,22 +92,22 @@ public class ClienteGUI extends JFrame implements ActionListener {
 
         c.setLayout(new BorderLayout());
         c.add(outerPanel, BorderLayout.CENTER);
-        c.add(getPainelUsuario(), BorderLayout.WEST);
+       c.add(getPainelUsuario(), BorderLayout.WEST);
 
         frame.add(c);
         frame.pack();
-        frame.setAlwaysOnTop(true);
+        frame.setAlwaysOnTop(false);
         frame.setLocation(150, 150);
         textField.requestFocus();
 
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.setVisible(true);
+                
     }
 
-    
     public JPanel getPainelTexto() {
-        String bem_vindo = "Bem-vindo, digite seu nome e pressione Iniciar para começar\n";
-        campoTexto = new JTextArea(bem_vindo, 14, 35);
+        String bem_vindo = "Bem-vindo, digite seu nome e pressione Iniciar\n";
+        campoTexto = new JTextArea(bem_vindo, 10, 35);
         campoTexto.setMargin(new Insets(10, 10, 10, 10));
         campoTexto.setFont(meiryoFont);
 
@@ -116,22 +118,27 @@ public class ClienteGUI extends JFrame implements ActionListener {
         JScrollPane scrollPane = new JScrollPane(campoTexto);
         painelTexto = new JPanel();
         painelTexto.add(scrollPane);
+        painelTexto.setAutoscrolls(true);
+        painelTexto.setBackground(Color.BLACK);
+        
+        
 
         painelTexto.setFont(new Font("Meiryo", Font.PLAIN, 14));
         return painelTexto;
     }
 
-    
     public JPanel getEntradaPainel() {
-        entradaPainel = new JPanel(new GridLayout(1, 1, 5, 5));
+        entradaPainel = new JPanel(new GridLayout(1, 1, 1, 1));
         entradaPainel.setBorder(borda);
         textField = new JTextField();
         textField.setFont(meiryoFont);
         entradaPainel.add(textField);
+        
+
         return entradaPainel;
+
     }
 
-   
     public JPanel getPainelUsuario() {
 
         painelUsuario = new JPanel(new BorderLayout());
@@ -151,7 +158,6 @@ public class ClienteGUI extends JFrame implements ActionListener {
         return painelUsuario;
     }
 
-   
     public void setPainelCliente(String[] clientesConectados) {
         painelCliente = new JPanel(new BorderLayout());
         listaModel = new DefaultListModel<>();
@@ -194,8 +200,6 @@ public class ClienteGUI extends JFrame implements ActionListener {
         return buttonPanel;
     }
 
-   
-    
     @Override
     public void actionPerformed(ActionEvent e) {
 
@@ -203,7 +207,7 @@ public class ClienteGUI extends JFrame implements ActionListener {
             if (e.getSource() == botaoIniciar) {
                 nome = textField.getText();
                 if (nome.length() != 0) {
-                    frame.setTitle(nome + "'s console ");
+                    frame.setTitle(" Cliente " + nome);
                     textField.setText("");
                     campoTexto.append("nome de ususario : " + nome + " conectando ao chat...\n");
                     getConectado(nome);
@@ -220,7 +224,7 @@ public class ClienteGUI extends JFrame implements ActionListener {
                 menssagem = textField.getText();
                 textField.setText("");
                 enviarMensagem(menssagem);
-                System.out.println("Sending message : " + menssagem);
+                System.out.println("Enviando menssagme : " + menssagem);
             }
 
             if (e.getSource() == botaoMensagemPV) {
@@ -239,18 +243,16 @@ public class ClienteGUI extends JFrame implements ActionListener {
         }
 
     }
-    
+
     private void enviarMensagem(String chatMessage) throws RemoteException {
         chatCliente.serverStatic.updateChat(nome, chatMessage);
     }
 
- 
     private void enviarMensagemPV(int[] privateList) throws RemoteException {
         String privateMessage = "[PV para " + nome + "] :" + menssagem + "\n";
         chatCliente.serverStatic.enviarPV(privateList, privateMessage);
     }
 
-   
     private void getConectado(String userName) throws RemoteException {
         String limparNomeUser = userName.replaceAll("\\s+", "_");
         limparNomeUser = userName.replaceAll("\\W+", "_");

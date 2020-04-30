@@ -17,12 +17,12 @@ import cliente.ClienteStatic;
  */
 public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 	String linha = "---------------------------------------------\n";
-	private Vector<Conversas> conversas;
+	private final Vector<Conversas> conversas;
 	private static final long serialVersionUID = 1L;
 	
 	public ChatServidor() throws RemoteException {
 		super();
-		conversas = new Vector<Conversas>(10, 1);
+		conversas = new Vector<>(10, 1);
 	}
 	
 	public static void main(String[] args) {
@@ -40,7 +40,7 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 			Naming.rebind("rmi://" + hostName + "/" + serviceName, hello);
 			System.out.println("Grupo de Chat RMI Server rodando...");
 		}
-		catch(Exception e){
+		catch(MalformedURLException | RemoteException e){
 			System.out.println("Problemas ao iniciar servidor");
 		}	
 	}
@@ -52,7 +52,6 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 			System.out.println(" Servidor RMI pronto");
 		}
 		catch(RemoteException e) {
-			e.printStackTrace();
 		}
 	}
 		
@@ -62,6 +61,7 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 	}
 	
         
+        @Override
 	public void updateChat(String name, String nextPost) throws RemoteException {
 		String message =  name + " : " + nextPost + "\n";
 		enviarTodos(message);
@@ -72,7 +72,6 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 		try{
 			System.out.println(linha + ref.toString());
 		}catch(Exception e){
-			e.printStackTrace();
 		}
 	}
 
@@ -101,7 +100,6 @@ public class ChatServidor extends UnicastRemoteObject implements ServerStatic {
 			updateListaUsuario();		
 		}
 		catch(RemoteException | MalformedURLException | NotBoundException e){
-			e.printStackTrace();
 		}
 	}
 	
